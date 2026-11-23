@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Headphone Tone Lab</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0b1220;
+  color: #edf4ff;
+  font-family: Arial, sans-serif;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+main {
+  width: min(520px, 100%);
+  background: #17243a;
+  border: 1px solid #34445d;
+  border-radius: 20px;
+  padding: 28px;
+}
+h1 { margin-top: 0; }
+p { color: #aabbd2; line-height: 1.5; }
+label { display: block; margin: 22px 0 8px; font-weight: bold; }
+select, input { width: 100%; }
+select {
+  padding: 12px;
+  border-radius: 9px;
+  background: #0b1220;
+  color: white;
+  border: 1px solid #34445d;
+}
+input { accent-color: #6ee7c2; }
+.value { color: #6ee7c2; float: right; }
+.buttons { display: flex; gap: 12px; margin-top: 26px; }
+button {
+  flex: 1;
+  padding: 14px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#start { background: #6ee7c2; color: #06251d; }
+#stop { background: #34445d; color: white; }
+button:disabled { opacity: .45; }
+#status { margin-top: 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Headphone Tone Lab</h1>
+  <p>Play a gentle test tone through an audio output connected to your device.</p>
+
+  <label for="output">Audio output</label>
+  <select id="output">
+    <option value="">Default audio output</option>
+  </select>
+
+  <label for="frequency">
+    Frequency <span class="value" id="freqValue">440 Hz</span>
+  </label>
+  <input id="frequency" type="range" min="100" max="2000"
+         value="440" step="10">
+
+  <label for="volume">
+    Volume <span class="value" id="volValue">5%</span>
+  </label>
+  <input id="volume" type="range" min="0" max="15" value="5">
+
+  <div class="buttons">
+    <button id="start">Start tone</button>
+    <button id="stop" disabled>Stop</button>
+  </div>
+
+  <p id="status">Stopped. Press Start when ready.</p>
+  <p><strong>Safety:</strong> Start at low volume. Stop if the sound feels uncomfortable.</p>
+  <p>This page only plays through audio outputs available to your own device. It cannot remotely connect to other people's headphones.</p>
+</main>
+
+<script>
+const output = document.getElementById("output");
+const frequency = document.getElementById("frequency");
+const volume = document.getElementById("volume");
+const start = document.getElementById("start");
+const stop = document.getElementById("stop");
+const status = document.getElementById("status");
+
+let audio = null;
+let oscillator = null;
+let gain = null;
+
+function update() {
+  document.getElementById("freqValue").textContent =
+    frequency.value + " Hz";
+  document.getElementById("volValue").textContent =
+    volume.value + "%";
+
+  if (oscillator && audio) {
+    oscillator.frequency.setTargetAtTime(
+      Number(frequency.value), audio.currentTime, 0.03
+    );
+    gain.gain.setTargetAtTime(
+      Number(volume.value) / 100, audio.currentTime, 0.03
+    );
+  }
+}
+
+frequency.addEventListener("input", update);
+volume.addEventListener("input", update);
+
+async function refreshDevices() {
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const previous = output.value;
+    output.innerHTML = '<option value="">Default audio output</option>';
+
+    devices.filter(d => d.kind === "audiooutput").forEach((d, i) => {
+      output.add(new Option(
+        d.label || "Audio output " + (i + 1), d.deviceId
+      ));
+    });
+
+    if ([...output.options].some(o => o.value === previous)) {
+      output.value = previous;
+    }
+  } catch (e) {
+    status.textContent = "Could not list audio outputs.";
+  }
+}
+
+output.addEventListener("change", async () => {
+  if (!audio || !output.value) return;
+
+  if (typeof audio.setSinkId !== "function") {
+    status.textContent =
+      "Your browser cannot select outputs here. Use your computer sound settings.";
+    return;
+  }
+
+  try {
+    await audio.setSinkId(output.value);
+    status.textContent = "Audio output selected.";
+  } catch (e) {
+    status.textContent = "Could not select that audio output.";
+  }
+});
+
+start.addEventListener("click", async () => {
+  try {
+    if (!audio) {
+      audio = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    await audio.resume();
+
+    if (output.value && typeof audio.setSinkId === "function") {
+      await audio.setSinkId(output.value);
+    }
+
+    oscillator = audio.createOscillator();
+    gain = audio.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = Number(frequency.value);
+    gain.gain.value = Number(volume.value) / 100;
+
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+    oscillator.start();
+
+    start.disabled = true;
+    stop.disabled = false;
+    status.textContent = "Tone playing. Press Stop to end.";
+  } catch (e) {
+    status.textContent = "Could not start audio. Check browser settings.";
+  }
+});
+
+function stopTone() {
+  if (oscillator) {
+    oscillator.stop();
+    oscillator.disconnect();
+    oscillator = null;
+  }
+
+  if (gain) {
+    gain.disconnect();
+    gain = null;
+  }
+
+  start.disabled = false;
+  stop.disabled = true;
+  status.textContent = "Stopped.";
+}
+
+stop.addEventListener("click", stopTone);
+window.addEventListener("pagehide", stopTone);
+
+update();
+refreshDevices();
+</script>
+</body>
+</html>

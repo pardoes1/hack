@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Headphone Tone Lab</title>
+<title>Bluetooth Connect</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -12,7 +12,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background: #0b1220;
-  color: #edf4ff;
+  color: white;
   font-family: Arial, sans-serif;
   display: grid;
   place-items: center;
@@ -20,458 +20,160 @@ body {
 }
 
 main {
-  width: min(550px, 100%);
+  width: min(480px, 100%);
   background: #17243a;
-  border: 1px solid #34445d;
-  border-radius: 20px;
   padding: 28px;
-  box-shadow: 0 20px 60px #0005;
+  border-radius: 20px;
+  border: 1px solid #34445d;
 }
 
 h1 { margin-top: 0; }
-h2 { margin-top: 28px; }
 
-p {
-  color: #aabbd2;
-  line-height: 1.5;
-}
-
-label {
-  display: block;
-  margin: 22px 0 8px;
-  font-weight: bold;
-}
-
-select, input { width: 100%; }
-
-select {
-  padding: 12px;
-  border-radius: 9px;
-  background: #0b1220;
-  color: white;
-  border: 1px solid #34445d;
-}
-
-input { accent-color: #6ee7c2; }
-
-.value {
-  color: #6ee7c2;
-  float: right;
-}
+p { color: #aabbd2; line-height: 1.5; }
 
 button {
-  padding: 13px 16px;
+  width: 100%;
+  padding: 15px;
+  margin-top: 12px;
   border: 0;
   border-radius: 10px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  margin: 5px 4px 5px 0;
 }
 
-.primary {
+#connect {
   background: #6ee7c2;
   color: #06251d;
 }
 
-.secondary {
+#disconnect {
   background: #34445d;
   color: white;
 }
 
-button:disabled {
+#disconnect:disabled {
   opacity: .4;
   cursor: not-allowed;
 }
 
-.section {
-  border-top: 1px solid #34445d;
-  margin-top: 25px;
-  padding-top: 10px;
+.device {
+  padding: 18px;
+  background: #0b1220;
+  border: 1px solid #34445d;
+  border-radius: 12px;
+  margin-top: 22px;
 }
 
 .status {
-  background: #0b1220;
-  border: 1px solid #34445d;
-  padding: 13px;
-  border-radius: 10px;
-  margin-top: 15px;
-  font-size: 14px;
-  overflow-wrap: anywhere;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #34445d;
+  font-size: 13px;
+  margin-top: 10px;
 }
 
-.note { font-size: 13px; }
+.connected {
+  background: #164d3c;
+  color: #6ee7c2;
+}
+
+.small {
+  font-size: 12px;
+  color: #8294ad;
+}
 </style>
 </head>
 
 <body>
 <main>
+  <h1>🎧 Bluetooth Connect</h1>
+  <p>
+    Find and select a Bluetooth device using your browser.
+  </p>
 
-<h1>🎧 Headphone Tone Lab</h1>
+  <button id="connect">＋ Connect Bluetooth</button>
 
-<p>
-Select your own Bluetooth headphones, choose an audio output
-and play a gentle test tone.
-</p>
+  <div class="device">
+    <h3 id="deviceName">No device selected</h3>
+    <div class="status" id="status">Not connected</div>
+    <p id="details">Choose Connect Bluetooth to select a device.</p>
+  </div>
 
-<div class="section">
-<h2>1. Bluetooth devices</h2>
+  <button id="disconnect" disabled>Disconnect</button>
 
-<p>
-Search for Bluetooth devices using your browser's permission window.
-</p>
-
-<button class="primary" id="bluetoothSearch">
-Search Bluetooth devices
-</button>
-
-<button class="secondary" id="bluetoothDisconnect" disabled>
-Disconnect
-</button>
-
-<div class="status" id="bluetoothStatus">
-No Bluetooth device selected.
-</div>
-
-<p class="note">
-Bluetooth selection requires a supported browser and a secure HTTPS
-connection. This feature selects a device and does not automatically
-pair headphones or route audio to them.
-</p>
-</div>
-
-<div class="section">
-<h2>2. Audio output</h2>
-
-<label for="output">Choose your headphones</label>
-
-<select id="output">
-<option value="">Default audio output</option>
-</select>
-
-<button class="secondary" id="refresh">
-Refresh audio devices
-</button>
-
-<p class="note">
-Pair your headphones using your computer's Bluetooth settings first.
-Audio output selection depends on browser support.
-</p>
-</div>
-
-<div class="section">
-<h2>3. Tone generator</h2>
-
-<label for="frequency">
-Frequency
-<span class="value" id="freqValue">440 Hz</span>
-</label>
-
-<input
-id="frequency"
-type="range"
-min="100"
-max="2000"
-step="10"
-value="440"
->
-
-<label for="volume">
-Volume
-<span class="value" id="volValue">5%</span>
-</label>
-
-<input
-id="volume"
-type="range"
-min="0"
-max="15"
-value="5"
->
-
-<br><br>
-
-<button class="primary" id="start">
-▶ Start tone
-</button>
-
-<button class="secondary" id="stop" disabled>
-■ Stop
-</button>
-
-<div class="status" id="status">
-Stopped. Press Start when ready.
-</div>
-
-<p class="note">
-Start at low volume. Keep the sound comfortable and stop if it
-feels unpleasant.
-</p>
-</div>
-
-<p class="note">
-This website only controls audio on your own device. It cannot
-secretly connect to, change or play audio through other people's
-headphones.
-</p>
-
+  <p class="small">
+    Bluetooth device selection requires a supported browser.
+    Ordinary headphones must be paired through your computer's
+    Bluetooth settings. Selecting a device here does not itself
+    establish an audio connection.
+  </p>
 </main>
 
 <script>
-// Bluetooth device selection
-let bluetoothDevice = null;
+const connectButton = document.getElementById("connect");
+const disconnectButton = document.getElementById("disconnect");
 
-const bluetoothSearch =
-  document.getElementById("bluetoothSearch");
+const deviceName = document.getElementById("deviceName");
+const status = document.getElementById("status");
+const details = document.getElementById("details");
 
-const bluetoothDisconnect =
-  document.getElementById("bluetoothDisconnect");
+let device = null;
 
-const bluetoothStatus =
-  document.getElementById("bluetoothStatus");
+function setStatus(message, connected = false) {
+  status.textContent = message;
+  status.className = connected ? "status connected" : "status";
+}
 
-bluetoothSearch.addEventListener("click", async () => {
+connectButton.addEventListener("click", async () => {
 
   if (!navigator.bluetooth) {
-    bluetoothStatus.textContent =
-      "Web Bluetooth is not supported. Try Chrome or Edge on a supported computer.";
+    setStatus("Browser not supported");
+    details.textContent =
+      "Try Chrome or Edge on a supported computer using HTTPS.";
     return;
   }
 
   try {
-    bluetoothStatus.textContent =
-      "Opening Bluetooth selection...";
+    setStatus("Searching...");
+    details.textContent = "Choose a device in the browser window.";
 
-    bluetoothDevice = await navigator.bluetooth.requestDevice({
+    device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true
     });
 
-    bluetoothStatus.textContent =
-      "Selected device: " +
-      (bluetoothDevice.name || "Unnamed device") +
-      ". Use your computer's Bluetooth settings to pair it.";
+    deviceName.textContent = device.name || "Unnamed Bluetooth device";
+    setStatus("Device selected");
+    details.textContent =
+      "Selected successfully. Pair headphones in your computer's Bluetooth settings to use them for audio.";
 
-    bluetoothDisconnect.disabled = false;
+    disconnectButton.disabled = false;
 
-    bluetoothDevice.addEventListener(
-      "gattserverdisconnected",
-      () => {
-        bluetoothStatus.textContent = "Device disconnected.";
-        bluetoothDisconnect.disabled = true;
-      }
-    );
+    device.addEventListener("gattserverdisconnected", () => {
+      setStatus("Disconnected");
+      details.textContent = "The Bluetooth GATT connection ended.";
+    });
 
   } catch (error) {
-    bluetoothStatus.textContent =
-      "Selection cancelled or unavailable.";
+    setStatus("Not connected");
+    details.textContent =
+      "No device selected. You can try again.";
   }
 });
 
-bluetoothDisconnect.addEventListener("click", () => {
+disconnectButton.addEventListener("click", () => {
 
-  if (bluetoothDevice?.gatt?.connected) {
-    bluetoothDevice.gatt.disconnect();
+  if (device?.gatt?.connected) {
+    device.gatt.disconnect();
   }
 
-  bluetoothDevice = null;
-
-  bluetoothStatus.textContent = "Device selection cleared.";
-
-  bluetoothDisconnect.disabled = true;
+  device = null;
+  deviceName.textContent = "No device selected";
+  setStatus("Disconnected");
+  details.textContent = "Choose Connect Bluetooth to start again.";
+  disconnectButton.disabled = true;
 });
-
-
-// Audio output selection
-const output = document.getElementById("output");
-
-async function refreshDevices() {
-
-  if (!navigator.mediaDevices?.enumerateDevices) {
-    return;
-  }
-
-  try {
-    const previous = output.value;
-
-    const devices =
-      await navigator.mediaDevices.enumerateDevices();
-
-    output.innerHTML =
-      '<option value="">Default audio output</option>';
-
-    devices
-      .filter(device => device.kind === "audiooutput")
-      .forEach((device, index) => {
-
-        const option = document.createElement("option");
-
-        option.value = device.deviceId;
-
-        option.textContent =
-          device.label || "Audio output " + (index + 1);
-
-        output.appendChild(option);
-      });
-
-    if ([...output.options].some(option =>
-      option.value === previous
-    )) {
-      output.value = previous;
-    }
-
-  } catch (error) {
-    document.getElementById("status").textContent =
-      "Could not list audio outputs.";
-  }
-}
-
-document.getElementById("refresh")
-  .addEventListener("click", refreshDevices);
-
-
-// Tone generator
-const frequency = document.getElementById("frequency");
-const volume = document.getElementById("volume");
-
-const start = document.getElementById("start");
-const stop = document.getElementById("stop");
-
-const status = document.getElementById("status");
-
-let audio = null;
-let oscillator = null;
-let gain = null;
-
-function updateControls() {
-
-  document.getElementById("freqValue").textContent =
-    frequency.value + " Hz";
-
-  document.getElementById("volValue").textContent =
-    volume.value + "%";
-
-  if (oscillator && audio) {
-
-    oscillator.frequency.setTargetAtTime(
-      Number(frequency.value),
-      audio.currentTime,
-      0.03
-    );
-
-    gain.gain.setTargetAtTime(
-      Number(volume.value) / 100,
-      audio.currentTime,
-      0.03
-    );
-  }
-}
-
-frequency.addEventListener("input", updateControls);
-volume.addEventListener("input", updateControls);
-
-
-// Change audio output
-output.addEventListener("change", async () => {
-
-  if (!audio || !output.value) return;
-
-  if (typeof audio.setSinkId !== "function") {
-    status.textContent =
-      "Output selection is unsupported in this browser.";
-    return;
-  }
-
-  try {
-    await audio.setSinkId(output.value);
-    status.textContent = "Audio output selected.";
-
-  } catch (error) {
-    status.textContent =
-      "Could not select that audio output.";
-  }
-});
-
-
-// Start sound
-start.addEventListener("click", async () => {
-
-  try {
-
-    if (!audio) {
-      audio = new (
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
-    }
-
-    await audio.resume();
-
-    if (
-      output.value &&
-      typeof audio.setSinkId === "function"
-    ) {
-      await audio.setSinkId(output.value);
-    }
-
-    oscillator = audio.createOscillator();
-    gain = audio.createGain();
-
-    oscillator.type = "sine";
-
-    oscillator.frequency.value =
-      Number(frequency.value);
-
-    gain.gain.value =
-      Number(volume.value) / 100;
-
-    oscillator.connect(gain);
-    gain.connect(audio.destination);
-
-    oscillator.start();
-
-    start.disabled = true;
-    stop.disabled = false;
-
-    status.textContent =
-      "Tone playing. Press Stop to end.";
-
-  } catch (error) {
-
-    status.textContent =
-      "Could not start audio. Check browser settings.";
-
-    oscillator = null;
-    gain = null;
-  }
-});
-
-
-// Stop sound
-function stopTone() {
-
-  if (oscillator) {
-    oscillator.stop();
-    oscillator.disconnect();
-    oscillator = null;
-  }
-
-  if (gain) {
-    gain.disconnect();
-    gain = null;
-  }
-
-  start.disabled = false;
-  stop.disabled = true;
-
-  status.textContent = "Stopped.";
-}
-
-stop.addEventListener("click", stopTone);
-
-window.addEventListener("pagehide", stopTone);
-
-updateControls();
-refreshDevices();
-
 </script>
 </body>
 </html>
